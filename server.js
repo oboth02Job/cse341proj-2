@@ -6,7 +6,7 @@ const mongodb = require("./data/database")
 const bodyParser = require("body-parser");
 const bookingsRoutes = require("./routes/bookingsRoutes");
 const destinationsRoutes = require("./routes/destinationsRoutes");
-const UsersRoutes = require("./routes/UsersRoutes");
+const usersRoutes = require("./routes/UsersRoutes");
 
 
 app.use(express.json());
