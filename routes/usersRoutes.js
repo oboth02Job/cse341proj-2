@@ -4,7 +4,6 @@ const router = express.Router();
 
 const usersController = require("../controllers/usersController");
 
-router.use("/", require("./swagger"));
 router.get("/", usersController.getAll);
 
 router.get("/:id", usersController.getSingle);

@@ -7,14 +7,16 @@ const bodyParser = require("body-parser");
 const bookingsRoutes = require("./routes/bookingsRoutes");
 const destinationsRoutes = require("./routes/destinationsRoutes");
 const usersRoutes = require("./routes/usersRoutes");
+const cors = require("cors")
 
-
+app.use(cors())
 app.use(express.json());
 
 app.get("/", (req, res) => {
     res.send("Hello world from server")
 })
 
+app.use("/api-docs", require("./routes/swagger"));
 app.use("/booking", require("./routes/bookingsRoutes"));
 app.use("/destination", require("./routes/destinationsRoutes"));
 app.use("/users", require("./routes/usersRoutes"));
