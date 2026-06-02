@@ -2,60 +2,109 @@ const ObjectId = require("mongodb").ObjectId;
 const mongodb = require("../data/database");
 
 const getAllBookings = async (req, res) => {
-  const result = mongodb.getDatabase().collection("bookings").find();
-  const bookings = await result.toArray();
-  res.setHeader("Content-Type", "application/json");
-  res.status(200).json(bookings);
-};
+  try {
+    const result = mongodb.getDatabase().collection("bookings").find();
+    const bookings = await result.toArray();
+    res.status(200).json(bookings);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message || "An error occurred while retrieving the booking" })
+  }
+}
 
 const getSingleBookings = async (req, res) => {
-    const bookingId = new ObjectId(req.params.id)
-  const result = await mongodb.getDatabase().collection("bookings").findOne({ _id: bookingId});
-  res.setHeader("Content-Type", "application/json");
-  res.status(200).json(result);
+  try {
+        if (!ObjectId.isValid(req.params.id)) {
+          return res.status(400).json({ message: "Invalid booking ID" });
+
+          const bookingId = new ObjectId(req.params.id);
+          const result = await mongodb
+            .getDatabase()
+            .collection("bookings")
+            .findOne({ _id: bookingId });
+        } if (!result) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    res.status(200).json(result);
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message:error.message || "An error occurred while retrieving the booking"
+    })
+}
 };
 
 const createBooking = async (req, res) => {
-  const createABooking = {
-    destinationId: req.body.destinationId,
-    travelDate: req.body.travelDate,
-    numberOfPeople: req.body.numberOfPeople,
-  };
+  try {
+    if (
+      !req.body.destinationId ||
+      !req.body.travelDate ||
+      !req.body.numberOfPeople
+    ) {
+      return res.status(400).json({message: "All fields required"}) 
+    }
+    const createABooking = {
+      destinationId: req.body.destinationId,
+      travelDate: req.body.travelDate,
+      numberOfPeople: req.body.numberOfPeople
+    }
     const result = await mongodb.getDatabase().collection("bookings").insertOne(createABooking)
-    res.setHeader("Content-Type", "application/json")
-  if (result.acknowledged) {
-    res.status(201).send("Booking creating successfully")
-  } else {
-    res.status(500).json(result.error || "Some error occurred while creating booking" )
+    if (!result.acknowledged) {
+      return res.status(500).json({ message: "Booking could not be created!" })
+    }  
+    res.status(201).send("Booking created successfully");
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: error.message || "Some error occurred while creating booking" })
   }
-};
+}
+  
 
 const updateBooking = async (req, res) => {
-   const bookingId = new ObjectId(req.params.id);
+  try {
+     if (!ObjectId.isValid(req.params.id)) {
+       return res.status(400).json({ message: "Invalid booking ID" });
+     }
+const bookingId = new ObjectId(req.params.id);
   const booking = {
     destinationId: req.body.destinationId,
     travelDate: req.body.travelDate,
     numberOfPeople: req.body.numberOfPeople,
-  };
-  const response = await mongodb.getDatabase().collection("bookings").replaceOne({ _id: bookingId }, booking)
-  if (response.modifiedCount > 0) {
-    res.status(200).send();
-  } else {
-    res.status(500).json(response.error || "Server error");
+    };
+   const response = await mongodb.getDatabase().collection("bookings").replaceOne({ _id: bookingId }, booking);
+    
+  if (response.matchedCount === 0) {
+    res.status(404).json({ message: "Booking not found" });
+    }
+    res.status(200).json({ message: "Booking updated successfully" });
   }
-
-};
+  catch (error) {
+    console.error(error);
+    return  res.status(500).json(error.message || "Server error");
+  } 
+  }
+ 
 
 const deleteBooking = async (req, res) => {
-  const bookingId = new ObjectId(req.params.id)
-  const response = await mongodb
+  try {
+  if (!ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "Invalid booking ID" });
+  }
+    const bookingId = new ObjectId(req.params.id);
+
+    const response = await mongodb
     .getDatabase()
     .collection("bookings")
     .deleteOne({ _id: bookingId });
-  if (response.deletedCount) {
-    res.status(200).send("Booking deleted")
-  } else {
-    res.status(500).json(response.error || "Something went wrong during deletion")
+  if (response.deletedCount === 0) {
+    res.status(200).send("Booking deleted");
+    } 
+    return res.status(404).json({message: "Booking not found"})
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: error.message || "Something went wrong during deletion" });
   }
 
 };
