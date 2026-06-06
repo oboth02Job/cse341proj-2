@@ -8,9 +8,27 @@ const bookingsRoutes = require("./routes/bookingsRoutes");
 const destinationsRoutes = require("./routes/destinationsRoutes");
 const usersRoutes = require("./routes/usersRoutes");
 const cors = require("cors")
+const passport = require("passport");
+const session = require("express-session");
+const githubStrategy = require("passport-github2").Strategy
+require("./config/passport")
+const authRoutes = require("./routes/authRoutes")
+
+app.use(
+  session({
+    secret: "mySecretKey",
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
 
 app.use(cors())
 app.use(express.json());
+
+app.use(passport.initialize())
+app.use(passport.session());
+
+app.use("/auth", authRoutes)
 
 app.get("/", (req, res) => {
     res.send("Hello world from server")

@@ -121,9 +121,9 @@ const deleteBooking = async (req, res) => {
       .collection("bookings")
       .deleteOne({ _id: bookingId });
     if (response.deletedCount === 0) {
-      res.status(200).send("Booking deleted");
+       return res.status(404).json({ message: "Booking not found" });
     }
-    return res.status(404).json({ message: "Booking not found" });
+     res.status(200).send("Booking deleted");
   } catch (error) {
     console.error(error);
     res
