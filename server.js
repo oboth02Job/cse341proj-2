@@ -22,6 +22,16 @@ app.use(
   }),
 );
 
+passport.serializeUser((user, done) => {
+  console.log("serializeUser called");
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  console.log("deserializeUser called");
+  done(null, user);
+});
+
 app.use(cors())
 app.use(express.json());
 
